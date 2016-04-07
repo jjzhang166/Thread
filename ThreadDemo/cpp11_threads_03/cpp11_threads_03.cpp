@@ -1,6 +1,10 @@
 // cpp11_threads_03.cpp : 定义控制台应用程序的入口点。
 //
 
+// we can use an atomic type which is a special kind of variable that allows safe concurrent reading/writing,
+// basically the synchronization is done under the hood.
+// As a side note on an atomic type we can apply only atomic operations which are defined in the atomic header:
+
 #include "stdafx.h"
 
 #include <iostream>

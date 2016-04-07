@@ -31,6 +31,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "image_processing", "image_p
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Multithreading", "Multithreading\Multithreading.vcxproj", "{D4EAF992-3D7E-4DF4-8830-2765A6FEE752}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpp_thread_03", "cpp_thread_03\cpp_thread_03.vcxproj", "{C29D6FEA-9931-4AD0-BA6F-8E132C09E95C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -151,6 +153,14 @@ Global
 		{D4EAF992-3D7E-4DF4-8830-2765A6FEE752}.Release|x64.Build.0 = Release|x64
 		{D4EAF992-3D7E-4DF4-8830-2765A6FEE752}.Release|x86.ActiveCfg = Release|Win32
 		{D4EAF992-3D7E-4DF4-8830-2765A6FEE752}.Release|x86.Build.0 = Release|Win32
+		{C29D6FEA-9931-4AD0-BA6F-8E132C09E95C}.Debug|x64.ActiveCfg = Debug|x64
+		{C29D6FEA-9931-4AD0-BA6F-8E132C09E95C}.Debug|x64.Build.0 = Debug|x64
+		{C29D6FEA-9931-4AD0-BA6F-8E132C09E95C}.Debug|x86.ActiveCfg = Debug|Win32
+		{C29D6FEA-9931-4AD0-BA6F-8E132C09E95C}.Debug|x86.Build.0 = Debug|Win32
+		{C29D6FEA-9931-4AD0-BA6F-8E132C09E95C}.Release|x64.ActiveCfg = Release|x64
+		{C29D6FEA-9931-4AD0-BA6F-8E132C09E95C}.Release|x64.Build.0 = Release|x64
+		{C29D6FEA-9931-4AD0-BA6F-8E132C09E95C}.Release|x86.ActiveCfg = Release|Win32
+		{C29D6FEA-9931-4AD0-BA6F-8E132C09E95C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

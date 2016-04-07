@@ -1,6 +1,10 @@
 // cpp11_threads_02.cpp : 定义控制台应用程序的入口点。
 //
 
+// We can avoid this problem by specifying that this variable should be accessed synchronously by our threads,
+// we can use for this a mutex which is a special purpose variable that acts like a barrier,
+// synchronizing the access to the code that modifies the result variable
+
 #include "stdafx.h"
 
 #include <iostream>
