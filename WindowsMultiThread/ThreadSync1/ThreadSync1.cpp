@@ -41,7 +41,10 @@ int main(int argc, char* argv[])
     //全为自动模式一次只能进去一个
     for (int iIndex = 0; iIndex < 3; ++iIndex)
     {
-        g_ThreadEvent[iIndex] = CreateEvent(NULL, false, false, NULL);
+        g_ThreadEvent[iIndex] = CreateEvent(NULL,  // default security attributes
+                                            false, // manual-reset event
+                                            false, // initial state is nonsignaled
+                                            NULL); // object name
     }
 
     SetEvent(g_ThreadEvent[0]);
@@ -50,7 +53,12 @@ int main(int argc, char* argv[])
 
     for (int iIndex = 0; iIndex < 3; iIndex++)
     {
-        hThread[iIndex] = (HANDLE)CreateThread(NULL, 0, ThreadFunc, (void *)iIndex, 0, NULL);
+        hThread[iIndex] = CreateThread(NULL,          // default security attributes
+                                       0,             // use default stack size 
+                                       ThreadFunc,    // thread function name
+                                       (void *)iIndex,// argument to thread function 
+                                       0,             // use default creation flags 
+                                       NULL);         // returns the thread identifier 
     }
 
     //等待所有线程结束
@@ -58,7 +66,14 @@ int main(int argc, char* argv[])
     cout << "运行结束，按任意键退出.....\n";
 
     char c = getchar();
-    CloseHandle(g_ThreadEvent);
+
+    for (auto index = 0; index < 3; ++index) {
+        CloseHandle(g_ThreadEvent[index]);
+    }
+
+    for (auto index = 0; index < 3; ++index){
+        CloseHandle(hThread[index]);
+    }
 
     return 0;
 }
