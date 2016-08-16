@@ -28,8 +28,12 @@ DWORD WINAPI ThreadFunc(void *p)
         //线程ABC分别等待事件0,1,2
         WaitForSingleObject(g_ThreadEvent[param], INFINITE);
         printf("the thread is %c\n", c);
+
+        //重置为无信号状态
         ResetEvent(g_ThreadEvent[g_EventIndex]);
         g_EventIndex = (g_EventIndex + 1) % 3;
+
+        // 将另外一个事件设置为有信号状态
         SetEvent(g_ThreadEvent[g_EventIndex]);
     }
 
