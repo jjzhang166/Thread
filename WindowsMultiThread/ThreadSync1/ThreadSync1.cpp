@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     for (int iIndex = 0; iIndex < 3; ++iIndex)
     {
         g_ThreadEvent[iIndex] = CreateEvent(NULL,  // default security attributes
-                                            false, // manual-reset event
+                                            false, // auto-reset event
                                             false, // initial state is nonsignaled
                                             NULL); // object name
     }

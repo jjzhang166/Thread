@@ -44,7 +44,10 @@ int main(int argc, char* argv[])
     //全为自动模式一次只能进去一个
     for (int iIndex = 0; iIndex < 3; iIndex++)
     {
-        g_ThreadEvent[iIndex] = CreateEvent(NULL, false, false, NULL);
+        g_ThreadEvent[iIndex] = CreateEvent(NULL, // default security attributes
+                                            false,// auto-reset event
+                                            false,// initial state is nonsignaled
+                                            NULL);// object name
     }
 
     HANDLE hThread[3];
@@ -52,12 +55,17 @@ int main(int argc, char* argv[])
     for (int iRunIndex = 0; iRunIndex < 3; iRunIndex++)
     {
         g_EventIndex = iRunIndex;
-        printf("\n\t\t第%d次运行开始\n", iRunIndex);
+        printf("\n第%d次运行开始\n", iRunIndex);
         SetEvent(g_ThreadEvent[g_EventIndex]);
 
         for (int iIndex = 0; iIndex < 3; iIndex++)
         {
-            hThread[iIndex] = (HANDLE)CreateThread(NULL, 0, ThreadFunc, (void *)iIndex, 0, NULL);
+            hThread[iIndex] = CreateThread(NULL,           // default security attributes
+                                           0,              // use default stack size
+                                           ThreadFunc,     // thread function name
+                                           (void *)iIndex, // argument to thread function
+                                           0,              // use default creation flags
+                                           NULL);          // returns the thread identifier
         }
 
         //等待所有线程结束
@@ -69,7 +77,7 @@ int main(int argc, char* argv[])
             CloseHandle(hThread[iIndex]);
         }
 
-        printf("\n\t\t第%d次运行结束\n", iRunIndex);
+        printf("第%d次运行结束\n", iRunIndex);
     }
 
     cout << "运行结束，按任意键退出.....\n";

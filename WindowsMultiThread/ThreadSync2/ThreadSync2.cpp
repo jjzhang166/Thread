@@ -25,9 +25,9 @@ DWORD WINAPI ThreadLoop(LPVOID lpParam)
     {
         WaitForSingleObject(g_ThreadEvent, INFINITE);
         ResetEvent(g_MainEvent);
-        printf("\n\t\t子线程进入循环\n");
+        printf("------子线程第%d次进入循环------\n", iIndex);
         Sleep(4);
-        printf("\n\t\t子线程离开循环\n");
+        printf("------子线程第%d次离开循环------\n\n", iIndex);
         SetEvent(g_MainEvent);
     }
 
@@ -45,22 +45,34 @@ void mainRun()
     {
         WaitForSingleObject(g_MainEvent, INFINITE);
         ResetEvent(g_ThreadEvent);
-        printf("\n\t\t主线程进入循环\n");
+        printf("------主线程第%d次进入循环------\n", iIndex);
         mainLoop();
-        printf("\n\t\t主线程离开循环\n");
+        printf("------主线程第%d次离开循环------\n\n", iIndex);
         SetEvent(g_ThreadEvent);
     }
 }
 int main(int argc, char* argv[])
 {
     //全为自动模式一次只能进去一个
-    g_ThreadEvent = CreateEvent(NULL, false, true, NULL);
+    g_ThreadEvent = CreateEvent(NULL,  // default security attributes
+                                false, // auto-reset event
+                                true,  // initial state is signaled
+                                NULL); // object name
 
     //设置为未触发
-    g_MainEvent = CreateEvent(NULL, false, false, NULL);
+    g_MainEvent = CreateEvent(NULL, // default security attributes
+                              false,// auto-reset event
+                              false,// initial state is nonsignaled
+                              NULL);// object name
 
+    // 设置为无信号状态
     ResetEvent(g_MainEvent);
-    HANDLE hThread = (HANDLE)CreateThread(NULL, 0, ThreadLoop, NULL, 0, NULL);
+    HANDLE hThread = CreateThread(NULL,       // default security attributes
+                                  0,          // use default stack size
+                                  ThreadLoop, // thread function name
+                                  NULL,       // argument to thread function
+                                  0,          // use default creation flags
+                                  NULL);      // returns the thread identifier
 
     mainRun();
     //等待所有线程结束
