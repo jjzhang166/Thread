@@ -94,7 +94,7 @@ public:
   {
        // Make This Thread sleep for 1 Second
        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-       std::cout<<&quot;Loading Data from XML&quot;<<std::endl;
+       std::cout<< "Loading Data from XM" <<std::endl;
        // Lock The Data structure
        std::lock_guard<std::mutex> guard(m_mutex);
        // Set the flag to true, means data is loaded
@@ -110,7 +110,7 @@ public:
   
   void mainTask()
   {
-      std::cout<<&quot;Do Some Handshaking&quot;<<std::endl;
+      std::cout<< "Do Some Handshaking" <<std::endl;
       // Acquire the lock
       std::unique_lock<std::mutex> mlock(m_mutex);
       // Start waiting for the Condition Variable to get signaled
@@ -118,8 +118,8 @@ public:
       // As soon as condition variable get signaled, resume the thread and
       // again acquire the lock. Then check if condition is met or not
       // If condition is met then continue else again go in wait.
-      m_condVar.wait(mlock, std::bind(&amp;Application::isDataLoaded, this));
-      std::cout<<&quot;Do Processing On loaded Data&quot;<<std::endl;
+      m_condVar.wait(mlock, std::bind(&Application::isDataLoaded, this));
+      std::cout<< "Do Processing On loaded Data" <<std::endl;
   }
 };
 
