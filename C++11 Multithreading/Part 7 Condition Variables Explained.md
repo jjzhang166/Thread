@@ -126,8 +126,8 @@ public:
 int main()
 {
    Application app;
-   std::thread thread_1(&amp;Application::mainTask, &amp;app);
-   std::thread thread_2(&amp;Application::loadData, &amp;app);
+   std::thread thread_1(&Application::mainTask, &app);
+   std::thread thread_2(&Application::loadData, &app);
    thread_2.join();
    thread_1.join();
    return 0;
