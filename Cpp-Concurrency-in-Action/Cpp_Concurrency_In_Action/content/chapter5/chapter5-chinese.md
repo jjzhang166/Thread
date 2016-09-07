@@ -2,14 +2,14 @@
 
 **本章主要内容**
 
-- C++11内存模型详解<br>
-- 标准库提供的原子类型<br>
-- 使用各种原子类型<br>
-- 原子操作实现线程同步功能<br>
+- C++11内存模型详解
+- 标准库提供的原子类型
+- 使用各种原子类型
+- 原子操作实现线程同步功能
 
-C++11标准中，有一个十分重要特性，常被程序员们所忽略。它不是一个新的语法特性，也不是新的工具，它就是新的多线程(感知)内存模型。内存模型没有明确的定义基本部件应该如何工作的话，之前介绍的那些工具就无法正常工作。那为什么大多数程序员都没有注意到它呢？当你使用互斥量保护你的数据和条件变量，或者是“期望”上的信号事件时，对于互斥量*为什么*能起到这样作用，大多数人不会去关心。只有当你试图去“接触硬件”，你才能详尽的了解到内存模型是如何起作用的。
+C++11标准中，有一个十分重要特性，常被程序员们所忽略。它不是一个新的语法特性，也不是新的工具，它就是新的多线程(感知)内存模型。内存模型没有明确的定义基本部件应该如何工作的话，之前介绍的那些工具就无法正常工作。那为什么大多数程序员都没有注意到它呢？当你使用互斥量保护你的数据和条件变量，或者是“期望”上的信号事件时，对于互斥量为什么能起到这样作用，大多数人不会去关心。只有当你试图去“接触硬件”，你才能详尽的了解到内存模型是如何起作用的。
 
-C++是一个系统级别的编程语言，标准委员会的目标之一就是不需要比C++还要底层的高级语言。C++应该向程序员提供足够的灵活性，无障碍的去做他们想要做的事情；当需要的时候，可以让他们“接触硬件”。原子类型和原子操作就允许他们“接触硬件”，并提供底层级别的同步操作，通常会将常规指令数缩减到1~2个CPU指令。
+C++是一个系统级别的编程语言，标准委员会的目标之一就是不需要比C++还要底层的高级语言。C++应该向程序员提供足够的灵活性，让他们做想要做的事情；当需要的时候，可以让他们“接触硬件”。原子类型和原子操作就允许他们“接触硬件”，并提供底层级别的同步操作，通常会将常规指令数缩减到1~2个CPU指令。
 
 在本章，我们将讨论内存模型的基本知识，而后再了解一下原子类型和操作，最后了解与原子类型操作相关的各种同步。这个过程可能会比较复杂：如果你已经打算使用原子操作(比如，第7章的无锁数据结构)同步你的代码，那么你就没有必要了解过多的细节。
 
@@ -17,15 +17,15 @@ C++是一个系统级别的编程语言，标准委员会的目标之一就是�
 
 ## 5.1 内存模型基础
 
-这里从两方面来讲内存模型：一方面是基本结构，这个结构奠定了与内存相关的基础；另一方面就是并发。基本结构对于并发也是很重要的，特别是当你阅读到底层原子操作的时候，所以我将会从基本结构讲起。在C++中，它与所有的对象和内存位置有关。
+​	这里从两方面来讲内存模型：一方面是基本结构，这个结构奠定了与内存相关的基础；另一方面是并发。基本结构对于并发也是很重要的，特别是当你阅读到底层原子操作的时候，所以我将会从基本结构讲起。在C++中，它与所有的对象和内存位置有关。
 
 ### 5.1.1 对象和内存位置
 
-在一个C++程序中的所有数据都是由对象(objects)构成。这不是说你可以创建一个int的衍生类，或者是基本类型中存在有成员函数，或是像在Smalltalk和Ruby语言下讨论程序那样——“一切都是对象”。“对象”仅仅是对C++数据构建块的一个声明。C++标准定义类对象为“存储区域”，但对象还是可以将自己的特性赋予其他对象，比如，其类型和生命周期。
+​	在一个C++程序中的所有数据都是由对象(objects)构成。这不是说你可以创建一个int的衍生类，或者是基本类型中存在有成员函数，或是像在Smalltalk和Ruby语言下讨论程序那样——“一切都是对象”。“对象”仅仅是对C++数据构建块的一个声明。C++标准定义类对象为“存储区域”，但对象还是可以将自己的特性赋予其他对象，比如，其类型和生命周期。
 
-像int或float这样的对象就是简单基本类型；当然，也有用户定义类的实例。一些对象(比如，数组，衍生类的实例，无静态数据成员的类的实现)拥有子对象，但是其他对象就没有。
+​	像int或float这样的对象就是简单基本类型；当然，也有用户定义类的实例。一些对象(比如，数组，衍生类的实例，无静态数据成员的类的实现)拥有子对象，但是其他对象就没有。
 
-无论对象是怎么样的一个类型，一个对象都会存储在一个或多个内存位置上。每一个内存位置不是一个标量类型的对象，就是一个标量类型的子对象，比如，unsigned short、my_class*或序列中的相邻位域。当你使用位域，就需要注意：虽然相邻位域中是不同的对象，但仍视其为相同的内存位置。如图5.1所示，将一个struct分解为多个对象，并且展示了每个对象的内存位置。
+​	无论对象是怎么样的一个类型，一个对象都会存储在一个或多个内存位置上。每一个内存位置不是一个标量类型的对象，就是一个标量类型的子对象，比如，unsigned short、my_class*或序列中的相邻位域。当你使用位域，就需要注意：虽然相邻位域中是不同的对象，但仍视其为相同的内存位置。如图5.1所示，将一个struct分解为多个对象，并且展示了每个对象的内存位置。
 
 ![](https://raw.githubusercontent.com/xiaoweiChen/Cpp_Concurrency_In_Action/master/images/chapter5/5-1.png)
 
@@ -33,12 +33,12 @@ C++是一个系统级别的编程语言，标准委员会的目标之一就是�
 
 首先，完整的struct是一个有多个子对象(每一个成员变量)组成的对象。位域bf1和bf2共享同一个内存位置(int是4字节、32位类型)，并且`std::string`类型的对象s由内部多个内存位置组成，但是其他的每个成员都拥有自己的内存位置。注意，位域宽度为0的bf3是如何与bf4分离，并拥有各自的内存位置的。(译者注：图中bf3是一个错误展示，在C++和C中规定，宽度为0的一个未命名位域强制下一位域对齐到其下一type边界，其中type是该成员的类型。这里使用命名变量为0的位域，可能只是想展示其与bf4是如何分离的。有关位域的更多可以参考[MSDN](https://msdn.microsoft.com/zh-cn/library/ewwyfdbe.aspx)、[wiki](http://en.wikipedia.org/wiki/Bit_field)的页面)。
 
-这里有四个需要牢记的原则：<br>
+这里有四个需要牢记的原则：
 
-1. 每一个变量都是一个对象，包括作为其成员变量的对象。<br>
-2. 每个对象至少占有一个内存位置。<br>
-3. 基本类型都有确定的内存位置(无论类型大小如何，即使他们是相邻的，或是数组的一部分)。<br>
-4. 相邻位域是相同内存中的一部分。<br>
+1. 每一个变量都是一个对象，包括作为其成员变量的对象。
+2. 每个对象至少占有一个内存位置。
+3. 基本类型都有确定的内存位置(无论类型大小如何，即使他们是相邻的，或是数组的一部分)。
+4. 相邻位域是相同内存中的一部分。
 
 我确定你会好奇，这些在并发中有什么作用，那么下面就让我们来见识一下。
 
@@ -84,52 +84,52 @@ C++是一个系统级别的编程语言，标准委员会的目标之一就是�
 
 表5.1 标准原子类型的备选名和与其相关的`std::atomic<>`特化类
 
-| 原子类型 | 相关特化类 |
-| ------------ | -------------- |
-| atomic_bool | std::atomic&lt;bool> |
-| atomic_char | std::atomic&lt;char> |
-| atomic_schar | std::atomic&lt;signed char> |
-| atomic_uchar | std::atomic&lt;unsigned char> |
-| atomic_int | std::atomic&lt;int> |
-| atomic_uint | std::atomic&lt;unsigned> |
-| atomic_short | std::atomic&lt;short> |
-| atomic_ushort | std::atomic&lt;unsigned short> |
-| atomic_long | std::atomic&lt;long> |
-| atomic_ulong | std::atomic&lt;unsigned long> |
-| atomic_llong | std::atomic&lt;long long> |
-| atomic_ullong | std::atomic&lt;unsigned long long> |
-| atomic_char16_t | std::atomic&lt;char16_t> |
-| atomic_char32_t | std::atomic&lt;char32_t> |
-| atomic_wchar_t | std::atomic&lt;wchar_t> |
+| 原子类型            | 相关特化类                              |
+| --------------- | ---------------------------------- |
+| atomic_bool     | std::atomic&lt;bool>               |
+| atomic_char     | std::atomic&lt;char>               |
+| atomic_schar    | std::atomic&lt;signed char>        |
+| atomic_uchar    | std::atomic&lt;unsigned char>      |
+| atomic_int      | std::atomic&lt;int>                |
+| atomic_uint     | std::atomic&lt;unsigned>           |
+| atomic_short    | std::atomic&lt;short>              |
+| atomic_ushort   | std::atomic&lt;unsigned short>     |
+| atomic_long     | std::atomic&lt;long>               |
+| atomic_ulong    | std::atomic&lt;unsigned long>      |
+| atomic_llong    | std::atomic&lt;long long>          |
+| atomic_ullong   | std::atomic&lt;unsigned long long> |
+| atomic_char16_t | std::atomic&lt;char16_t>           |
+| atomic_char32_t | std::atomic&lt;char32_t>           |
+| atomic_wchar_t  | std::atomic&lt;wchar_t>            |
 
 C++标准库不仅提供基本原子类型，还定义了与原子类型对应的非原子类型，就如同标准库中的`std::size_t`。如表5.2所示这些类型:
 
 表5.2 标准原子类型定义(typedefs)和对应的内置类型定义(typedefs)
 
-| 原子类型定义 | 标准库中相关类型定义 |
-| ------------ | -------------- |
-| atomic_int_least8_t | int_least8_t |
-| atomic_uint_least8_t | uint_least8_t |
-| atomic_int_least16_t | int_least16_t |
+| 原子类型定义                | 标准库中相关类型定义     |
+| --------------------- | -------------- |
+| atomic_int_least8_t   | int_least8_t   |
+| atomic_uint_least8_t  | uint_least8_t  |
+| atomic_int_least16_t  | int_least16_t  |
 | atomic_uint_least16_t | uint_least16_t |
-| atomic_int_least32_t | int_least32_t |
+| atomic_int_least32_t  | int_least32_t  |
 | atomic_uint_least32_t | uint_least32_t |
-| atomic_int_least64_t | int_least64_t |
+| atomic_int_least64_t  | int_least64_t  |
 | atomic_uint_least64_t | uint_least64_t |
-| atomic_int_fast8_t | int_fast8_t |
-| atomic_uint_fast8_t | uint_fast8_t |
-| atomic_int_fast16_t | int_fast16_t |
-| atomic_uint_fast16_t | uint_fast16_t |
-| atomic_int_fast32_t | int_fast32_t |
-| atomic_uint_fast32_t | uint_fast32_t |
-| atomic_int_fast64_t | int_fast64_t |
-| atomic_uint_fast64_t | uint_fast64_t |
-| atomic_intptr_t | intptr_t |
-| atomic_uintptr_t | uintptr_t |
-| atomic_size_t | size_t |
-| atomic_ptrdiff_t | ptrdiff_t |
-| atomic_intmax_t | intmax_t |
-| atomic_uintmax_t | uintmax_t |
+| atomic_int_fast8_t    | int_fast8_t    |
+| atomic_uint_fast8_t   | uint_fast8_t   |
+| atomic_int_fast16_t   | int_fast16_t   |
+| atomic_uint_fast16_t  | uint_fast16_t  |
+| atomic_int_fast32_t   | int_fast32_t   |
+| atomic_uint_fast32_t  | uint_fast32_t  |
+| atomic_int_fast64_t   | int_fast64_t   |
+| atomic_uint_fast64_t  | uint_fast64_t  |
+| atomic_intptr_t       | intptr_t       |
+| atomic_uintptr_t      | uintptr_t      |
+| atomic_size_t         | size_t         |
+| atomic_ptrdiff_t      | ptrdiff_t      |
+| atomic_intmax_t       | intmax_t       |
+| atomic_uintmax_t      | uintmax_t      |
 
 好多种类型！不过，它们有一个相当简单的模式；对于标准类型进行typedef T，相关的原子类型就在原来的类型名前加上atomic_的前缀：atomic_T。除了singed类型的缩写是s，unsigned的缩写是u，和long long的缩写是llong之外，这种方式也同样适用于内置类型。对于`std::atomic<T>`模板，使用对应的T类型去特化模板的方式，要好于使用别名的方式。
 
@@ -142,7 +142,7 @@ C++标准库不仅提供基本原子类型，还定义了与原子类型对应�
 1. Store操作，可选如下顺序：memory_order_relaxed, memory_order_release, memory_order_seq_cst。<br>
 2. Load操作，可选如下顺序：memory_order_relaxed, memory_order_consume, memory_order_acquire, memory_order_seq_cst。<br>
 3. Read-modify-write(读-改-写)操作，可选如下顺序：memory_order_relaxed, memory_order_consume, memory_order_acquire, memory_order_release, memory_order_acq_rel, memory_order_seq_cst。<br>
-所有操作的默认顺序都是memory_order_seq_cst。
+   所有操作的默认顺序都是memory_order_seq_cst。
 
 现在，让我们来看一下每个标准原子类型进行的操作，就从`std::atomic_flag`开始吧。
 
