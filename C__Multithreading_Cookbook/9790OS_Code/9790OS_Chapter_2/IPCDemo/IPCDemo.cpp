@@ -11,9 +11,9 @@ using namespace std;
 
 typedef struct _tagCOMMUNICATIONOBJECT
 {
-    HWND	hWndClient;
-    BOOL	bExitLoop;
-    LONG	lSleepTimeout;
+    HWND    hWndClient;
+    BOOL    bExitLoop;
+    LONG    lSleepTimeout;
 } COMMUNICATIONOBJECT, *PCOMMUNICATIONOBJECT;
 
 LRESULT CALLBACK WndProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -76,7 +76,16 @@ int _tmain(int argc, _TCHAR* argv[])
         cout << "Cannot create process red!" << endl << "Error:\t" << GetLastError() << endl;
         return 1;
     }
-    bSuccess = CreateProcess(TEXT("..\\Debug\\IPCWorker.exe"), TEXT("blue"), NULL, NULL, FALSE, 0, NULL, NULL, &startupInfoBlue, &processInformationBlue);
+    bSuccess = CreateProcess(TEXT("..\\Debug\\IPCWorker.exe"),
+                             TEXT("blue"),
+                             NULL,
+                             NULL,
+                             FALSE,
+                             0,
+                             NULL,
+                             NULL,
+                             &startupInfoBlue,
+                             &processInformationBlue);
     if (!bSuccess)
     {
         cout << "Cannot create process blue!" << endl << "Error:\t" << GetLastError() << endl;
@@ -152,15 +161,43 @@ HWND InitializeWnd()
     {
         return NULL;
     }
-    HWND hWnd = CreateWindow(wndEx.lpszClassName, TEXT("Interprocess communication Demo"),
-        WS_OVERLAPPEDWINDOW, 200, 200, 400, 300, NULL, NULL, wndEx.hInstance, NULL);
+    HWND hWnd = CreateWindow(wndEx.lpszClassName,
+                             TEXT("Interprocess communication Demo"),
+                             WS_OVERLAPPEDWINDOW,
+                             200,
+                             200,
+                             400,
+                             300,
+                             NULL,
+                             NULL,
+                             wndEx.hInstance,
+                             NULL);
     if (!hWnd)
     {
         return NULL;
     }
-    HWND hButton = CreateWindow(TEXT("BUTTON"), TEXT("Close"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
-        275, 225, 100, 25, hWnd, (HMENU)BUTTON_CLOSE, wndEx.hInstance, NULL);
-    HWND hStatic = CreateWindow(TEXT("STATIC"), TEXT(""), WS_CHILD | WS_VISIBLE, 10, 10, 365, 205, hWnd, NULL, wndEx.hInstance, NULL);
+    HWND hButton = CreateWindow(TEXT("BUTTON"),
+                                TEXT("Close"),
+                                WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
+                                275,
+                                225,
+                                100,
+                                25,
+                                hWnd,
+                                (HMENU)BUTTON_CLOSE,
+                                wndEx.hInstance,
+                                NULL);
+    HWND hStatic = CreateWindow(TEXT("STATIC"),
+                                TEXT(""),
+                                WS_CHILD | WS_VISIBLE,
+                                10,
+                                10,
+                                365,
+                                205,
+                                hWnd,
+                                NULL,
+                                wndEx.hInstance,
+                                NULL);
     ShowWindow(hWnd, SW_SHOW);
     UpdateWindow(hWnd);
     return hStatic;

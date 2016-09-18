@@ -18,10 +18,16 @@ int _tmain(int argc, _TCHAR* argv[])
     STARTUPINFO startupInfo = { 0 };
     PROCESS_INFORMATION processInformation = { 0 };
 
-    BOOL bSuccess = CreateProcess(
-        TEXT("C:\\Windows\\notepad.exe"), NULL, NULL,
-        NULL, FALSE, NULL, NULL, NULL, &startupInfo,
-        &processInformation);
+    BOOL bSuccess = CreateProcess(TEXT("C:\\Windows\\notepad.exe"),
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  FALSE,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  &startupInfo,
+                                  &processInformation);
 
     if (bSuccess)
     {
