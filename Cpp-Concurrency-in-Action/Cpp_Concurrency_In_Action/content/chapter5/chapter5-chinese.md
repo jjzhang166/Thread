@@ -297,7 +297,7 @@ p.fetch_add(3,std::memory_order_release);
 
 ​	除了标准原子类型，主模板的存在，允许用户使用自定义类型创建一个原子变量。**不是任何自定义类型都可以使用`std::atomic<>`的：需要满足一定的标准才行。为了使用`std::atomic<UDT>`(UDT是用户定义类型)，这个类型必须有拷贝赋值运算符**。**这就意味着这个类型不能有任何虚函数或虚基类，以及必须使用编译器创建的拷贝赋值操作**。不仅仅是这些，自定义类型中所有的基类和非静态数据成员也都需要支持拷贝赋值操作。这(基本上)就允许编译器使用`memcpy()`，或赋值操作的等价操作，因为它们的实现中没有用户代码。
 
-​	最后，这个类型必须是“位可比的”(*bitwise equality comparable*)。这与对赋值的要求差不多；你不仅需要确定，一个UDT类型对象可以使用`memcpy()`进行拷贝，还要确定其对象可以使用`memcmp()`对位进行比较。之所以要求这么多，是为了保证“比较/交换”操作能正常的工作。
+​	最后，这个类型必须是“位可比的”(*bitwise equality comparable*)。这与对赋值的要求差不多，你不仅需要确定一个UDT类型对象可以使用`memcpy()`进行拷贝，还要确定其对象可以使用`memcmp()`对位进行比较。之所以要求这么多，是为了保证“比较/交换”操作能正常的工作。
 
 ​	以上严格的限制都是依据第3章中的一个建议：不要将锁定区域内的数据，以引用或指针的形式，作为参数传递给用户提供的函数。通常情况下，编译器不会为`std::atomic<UDT>`类型生成无锁代码，所以它将对所有操作使用一个内部锁。如果用户提供的拷贝赋值或比较操作被允许，那么这就需要传递保护数据的引用作为一个参数，这就有悖于指导意见了。当原子操作需要时，运行库也可自由的使用单锁，并且运行库允许用户提供函数持有锁，这样就有可能产生死锁(或因为做一个比较操作，而组设了其他的线程)。最终，因为这些限制可以让编译器将用户定义的类型看作为一组原始字节，所以编译器可以对`std::atomic<UDT>`直接使用原子指令(因此实例化一个特殊无锁结构)。
 
@@ -315,15 +315,15 @@ p.fetch_add(3,std::memory_order_release);
 
 ### 5.2.7 原子操作的释放函数
 
-​	直到现在，我都还没有去描述成员函数对原子类型操作的形式。但是，在不同的原子类型中也有等价的非成员函数存在。大多数非成员函数的命名与对应成员函数有关，但是需要“atomic_”作为前缀(比如，`std::atomic_load()`)。这些函数都会被不同的原子类型所重载。在指定一个内存序列标签时，他们会分成两种：一种没有标签，另一种将“_explicit”作为后缀，并且需要一个额外的参数，或将内存顺序作为标签，亦或只有标签(例如，`std::atomic_store(&atomic_var,new_value)`与`std::atomic_store_explicit(&atomic_var,new_value,std::memory_order_release`)。不过，原子对象被成员函数隐式引用，所有释放函数都持有一个指向原子对象的指针(作为第一个参数)。
+​	直到现在，我们仅仅描述了原子类型操作的成员函数形式。但是，在不同的原子类型中也有等价的非成员函数存在。大多数非成员函数的命名与对应成员函数有关，但是需要“atomic_”作为前缀(比如，`std::atomic_load()`)。这些函数都会被不同的原子类型所重载。在指定一个内存序列标签时，他们会分成两种：一种没有标签，另一种将“_explicit”作为后缀，并且需要一个额外的参数，或将内存顺序作为标签，亦或只有标签(例如，`std::atomic_store(&atomic_var,new_value)`与`std::atomic_store_explicit(&atomic_var,new_value,std::memory_order_release`)。不过，原子对象被成员函数隐式引用，所有释放函数都持有一个指向原子对象的指针(作为第一个参数)。
 
-​	例如，`std::atomic_is_lock_free()`只有一种类型(虽然会被其他类型所重载)，并且对于同一个对象a，`std::atomic_is_lock_free(&a)`返回值与a.is_lock_free()相同。同样的，`std::atomic_load(&a)`和a.load()的作用一样，但需要注意的是，与a.load(std::memory_order_acquire)等价的操作是`std::atomic_load_explicit(&a, std::memory_order_acquire)`。
+​	例如，`std::atomic_is_lock_free()`只有一种类型(虽然会被其他类型所重载)，并且对于同一个对象a，`std::atomic_is_lock_free(&a)`返回值与`a.is_lock_free()`相同。同样的，`std::atomic_load(&a)`和`a.load()`的作用一样，但需要注意的是，与`a.load(std::memory_order_acquire)`等价的操作是`std::atomic_load_explicit(&a, std::memory_order_acquire)`。
 
-​	释放函数的设计是为了要与C语言兼容，在C中只能使用指针，而不能使用引用。例如，compare_exchange_weak()和compare_exchange_strong()成员函数的第一个参数(期望值)是一个引用，而`std::atomic_compare_exchange_weak()`(第一个参数是指向对象的指针)的第二个参数是一个指针。`std::atomic_compare_exchange_weak_explicit()`也需要指定成功和失败的内存序列，而“比较/交换”成员函数都有一个单内存序列形式(默认是`std::memory_order_seq_cst`)，重载函数可以分别获取成功和失败内存序列。
+​	释放函数的设计是为了要与C语言兼容，在C中只能使用指针，而不能使用引用。例如，`compare_exchange_weak()`和`compare_exchange_strong()`成员函数的第一个参数(期望值)是一个引用，而`std::atomic_compare_exchange_weak()`(第一个参数是指向对象的指针)的第二个参数是一个指针。`std::atomic_compare_exchange_weak_explicit()`也需要指定成功和失败的内存序列，而“比较/交换”成员函数都有一个单内存序列形式(默认是`std::memory_order_seq_cst`)，重载函数可以分别获取成功和失败内存序列。
 
 ​	对`std::atomic_flag`的操作是“反潮流”的，在那些操作中它们“标志”的名称为：`std::atomic_flag_test_and_set()`和`std::atomic_flag_clear()`，但是以“_explicit”为后缀的额外操作也能够指定内存顺序：`std::atomic_flag_test_and_set_explicit()`和`std::atomic_flag_clear_explicit()`。
 
-​	C++标准库也对在一个原子类型中的`std::shared_ptr<>`智能指针类型提供释放函数。这打破了“只有原子类型，才能提供原子操作”的原则，这里`std::shared_ptr<>`肯定不是原子类型。但是，C++标准委员会感觉对此提供额外的函数是很重要的。可使用的原子操作有：load, store, exchange和compare/exchange，这些操作重载了标准原子类型的操作，并且获取一个`std::shared_ptr<>*`作为第一个参数：
+​	C++标准库也提供了一下释放函数，用于以原子类型的方式访问`std::shared_ptr<>`的实例。这打破了“只有原子类型，才能提供原子操作”的原则，这里`std::shared_ptr<>`肯定不是原子类型。但是，C++标准委员会感觉对此提供额外的函数是很重要的。可使用的原子操作有：`load`, `store`, `exchange`和`compare/exchange`，这些操作重载了标准原子类型的操作，并且获取一个`std::shared_ptr<>*`作为第一个参数：
 
 ```c++
 std::shared_ptr<my_data> p;
@@ -339,9 +339,9 @@ void update_global_data()
 }
 ```
 
-作为和原子操作一同使用的其他类型，也提供“_explicit”变量，允许你指定所需的内存顺序，并且`std::atomic_is_lock_free()`函数可以用来确定实现是否使用锁，来保证原子性。
+​	对于其他类型上的原子操作，也提供“`_explicit`”变量，它允许你指定所需的内存顺序，并且`std::atomic_is_lock_free()`函数可以用来检查其实现类是否使用锁来保证原子性。
 
-如之前的描述，标准原子类型不仅仅是为了避免数据竞争所造成的未定义操作，它们还允许用户对不同线程上的操作进行强制排序。这种强制排序是数据保护和同步操作的基础，例如，`std::mutex`和`std::future<>`。所以，让我继续了解本章的真实意义：内存模型在并发方面的细节，如何使用原子操作同步数据和强制排序。
+​	如之前的描述，标准原子类型不仅仅是为了避免数据竞争所造成的未定义操作，它们还允许用户对不同线程上的操作进行强制排序，这种强制排序是数据保护和同步操作的基石，例如，`std::mutex`和`std::future<>`。考虑到这一点，让我们进入到本章真正的重点：内存模型在并发方面的细节，以及如何使用原子操作来同步数据和强制排序。
 
 ## 5.3 同步操作和强制排序
 
