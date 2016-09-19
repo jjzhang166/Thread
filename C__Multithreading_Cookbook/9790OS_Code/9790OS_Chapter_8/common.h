@@ -6,5 +6,5 @@
 
 typedef struct
 {
-	HMODULE hLibrary;
+    HMODULE hLibrary;
 } COMM_OBJECT, *PCOMM_OBJECT;

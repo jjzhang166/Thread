@@ -14,48 +14,59 @@
 class CLock
 {
 public:
-	CLock();
-	~CLock();
+    CLock();
+    ~CLock();
 private:
-	HANDLE hMutex;
+    HANDLE hMutex;
 };
 
 class CThread
 {
 public:
-	CThread() : hThread(0), dwThreadId(0), dwState(0), lpUserData(0), lpParameter(0){ }
-	HANDLE Create(LPVOID lpParameter, DWORD dwInitialState = STATE_ASYNC, DWORD dwCreationFlag = 0);
-	void Join(DWORD dwWaitInterval = INFINITE);
-	DWORD Suspend();
-	DWORD Resume();
-	void SetUserData(void* lpUserData);
-	void* GetUserData() const;
-	DWORD GetId() const;
-	HANDLE GetHandle() const;
-	DWORD GetAsyncState() const;
-	DWORD GetState() const;
-	void SetState(DWORD dwNewState);
-	BOOL Alert();
+    CThread()
+        : hThread(0)
+        , dwThreadId(0)
+        , dwState(0)
+        , lpUserData(0)
+        , lpParameter(0)
+    {
+
+    }
+
+    HANDLE Create(LPVOID lpParameter, DWORD dwInitialState = STATE_ASYNC, DWORD dwCreationFlag = 0);
+    void Join(DWORD dwWaitInterval = INFINITE);
+    DWORD Suspend();
+    DWORD Resume();
+    void SetUserData(void* lpUserData);
+    void* GetUserData() const;
+    DWORD GetId() const;
+    HANDLE GetHandle() const;
+    DWORD GetAsyncState() const;
+    DWORD GetState() const;
+    void SetState(DWORD dwNewState);
+    BOOL Alert();
+
 protected:
-	virtual void Run(LPVOID lpParameter = 0) = 0;
-	LPVOID lpParameter;
+    virtual void Run(LPVOID lpParameter = 0) = 0;
+    LPVOID lpParameter;
+
 private:
-	static DWORD WINAPI StartAddress(LPVOID lpParameter);
-	HANDLE hThread;
-	DWORD dwThreadId;
-	DWORD dwState;
-	void* lpUserData;
-	HANDLE hEvent;
+    static DWORD WINAPI StartAddress(LPVOID lpParameter);
+    HANDLE hThread;
+    DWORD dwThreadId;
+    DWORD dwState;
+    void* lpUserData;
+    HANDLE hEvent;
 };
 
 inline DWORD CThread::GetId() const
 {
-	return dwThreadId;
+    return dwThreadId;
 }
 
 inline HANDLE CThread::GetHandle() const
 {
-	return hThread;
+    return hThread;
 }
 
 #endif

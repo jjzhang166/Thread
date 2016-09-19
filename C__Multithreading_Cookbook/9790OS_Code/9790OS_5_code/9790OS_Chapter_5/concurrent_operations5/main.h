@@ -31,14 +31,14 @@ using namespace std;
 
 typedef struct
 {
-	int iA1;
-	int iB1;
-	int iC1;
-	int iA2;
-	int iB2;
-	int iC2;
-	HWND hWndProgress;
-	HWND hWndResult;
+    int iA1;
+    int iB1;
+    int iC1;
+    int iA2;
+    int iB2;
+    int iC2;
+    HWND hWndProgress;
+    HWND hWndResult;
 } QueueElement, *PQueueElement;
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

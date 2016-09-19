@@ -7,162 +7,162 @@
 class CNode
 {
 public:
-	CNode(CThread* thread) :thread(thread), next(0) { }
-	CThread* Thread() const { return thread; }
-	CNode*& Next(){ return next; }
+    CNode(CThread* thread) :thread(thread), next(0) { }
+    CThread* Thread() const { return thread; }
+    CNode*& Next() { return next; }
 private:
-	CThread* thread;
-	CNode* next;
+    CThread* thread;
+    CNode* next;
 };
 
 class CList
 {
 public:
-	CList() : dwCount(0), head(0){ }
-	virtual ~CList(){ }
-	void Insert(CNode*& node, CThread* thread);
-	CThread* GetFirst();
-	CThread* GetNext(CThread* thread);
-	CThread* Iterate(CThread* thread);
-	bool Remove(DWORD dwThreadId);
-	DWORD Count() const { return dwCount; }
-	CNode*& Head() { return head; }
+    CList() : dwCount(0), head(0) { }
+    virtual ~CList() { }
+    void Insert(CNode*& node, CThread* thread);
+    CThread* GetFirst();
+    CThread* GetNext(CThread* thread);
+    CThread* Iterate(CThread* thread);
+    bool Remove(DWORD dwThreadId);
+    DWORD Count() const { return dwCount; }
+    CNode*& Head() { return head; }
 protected:
-	CList(const CList& list);
-	CList& operator = (const CList& list);
+    CList(const CList& list);
+    CList& operator = (const CList& list);
 private:
-	CNode* head;
-	DWORD dwCount;
+    CNode* head;
+    DWORD dwCount;
 };
 
 void CList::Insert(CNode*& node, CThread* thread)
 {
-	if (node == NULL)
-	{
-		dwCount++;
-		node = new CNode(thread);
+    if (node == NULL)
+    {
+        dwCount++;
+        node = new CNode(thread);
 
-		return;
-	}
+        return;
+    }
 
-	Insert(node->Next(), thread);
+    Insert(node->Next(), thread);
 }
 
 inline CThread* CList::GetFirst()
 {
-	if (head == NULL)
-	{
-		return NULL;
-	}
+    if (head == NULL)
+    {
+        return NULL;
+    }
 
-	return head->Thread();
+    return head->Thread();
 }
 
 CThread* CList::GetNext(CThread* thread)
 {
-	if (head == NULL)
-	{
-		return NULL;
-	}
+    if (head == NULL)
+    {
+        return NULL;
+    }
 
-	if (thread == NULL)
-	{
-		return GetFirst();
-	}
+    if (thread == NULL)
+    {
+        return GetFirst();
+    }
 
-	if (head->Thread()->ThreadId() == thread->ThreadId())
-	{
-		if (head->Next() != NULL)
-		{
-			return head->Next() != NULL ? head->Next()->Thread() : NULL;
-		}
-	}
+    if (head->Thread()->ThreadId() == thread->ThreadId())
+    {
+        if (head->Next() != NULL)
+        {
+            return head->Next() != NULL ? head->Next()->Thread() : NULL;
+        }
+    }
 
-	CNode* lst = head->Next();
+    CNode* lst = head->Next();
 
-	while (lst != NULL)
-	{
-		if (lst->Thread()->ThreadId() == thread->ThreadId())
-		{
-			return lst->Next() != NULL ? lst->Next()->Thread() : NULL;
-		}
+    while (lst != NULL)
+    {
+        if (lst->Thread()->ThreadId() == thread->ThreadId())
+        {
+            return lst->Next() != NULL ? lst->Next()->Thread() : NULL;
+        }
 
-		lst = lst->Next();
-	}
+        lst = lst->Next();
+    }
 
-	return NULL;
+    return NULL;
 }
 
 CThread* CList::Iterate(CThread* thread)
 {
-	if (head == NULL)
-	{
-		return NULL;
-	}
+    if (head == NULL)
+    {
+        return NULL;
+    }
 
-	if (thread == NULL)
-	{
-		return GetFirst();
-	}
+    if (thread == NULL)
+    {
+        return GetFirst();
+    }
 
-	if (head->Thread()->ThreadId() == thread->ThreadId())
-	{
-		return head->Next() != NULL ? head->Next()->Thread() : head->Thread();
-	}
+    if (head->Thread()->ThreadId() == thread->ThreadId())
+    {
+        return head->Next() != NULL ? head->Next()->Thread() : head->Thread();
+    }
 
-	CNode* lst = head->Next();
+    CNode* lst = head->Next();
 
-	while (lst != NULL)
-	{
-		if (lst->Thread()->ThreadId() == thread->ThreadId())
-		{
-			return lst->Next() != NULL ? lst->Next()->Thread() : head->Thread();
-		}
+    while (lst != NULL)
+    {
+        if (lst->Thread()->ThreadId() == thread->ThreadId())
+        {
+            return lst->Next() != NULL ? lst->Next()->Thread() : head->Thread();
+        }
 
-		lst = lst->Next();
-	}
+        lst = lst->Next();
+    }
 
-	return head->Thread();
+    return head->Thread();
 }
 
 bool CList::Remove(DWORD dwThreadId)
 {
-	if (head == NULL)
-	{
-		return NULL;
-	}
+    if (head == NULL)
+    {
+        return NULL;
+    }
 
-	if (head->Thread()->ThreadId() == dwThreadId)
-	{
-		CNode* tmp = head;
-		head = head->Next();
+    if (head->Thread()->ThreadId() == dwThreadId)
+    {
+        CNode* tmp = head;
+        head = head->Next();
 
-		delete tmp;
-		dwCount--;
+        delete tmp;
+        dwCount--;
 
-		return true;
-	}
+        return true;
+    }
 
-	CNode* tmp = head;
-	CNode* lst = head->Next();
+    CNode* tmp = head;
+    CNode* lst = head->Next();
 
-	while (lst != NULL)
-	{
-		if (lst->Thread()->ThreadId() == dwThreadId)
-		{
-			tmp->Next() = lst->Next();
+    while (lst != NULL)
+    {
+        if (lst->Thread()->ThreadId() == dwThreadId)
+        {
+            tmp->Next() = lst->Next();
 
-			delete lst;
-			dwCount--;
+            delete lst;
+            dwCount--;
 
-			return true;
-		}
+            return true;
+        }
 
-		lst = lst->Next();
-		tmp = tmp->Next();
-	}
+        lst = lst->Next();
+        tmp = tmp->Next();
+    }
 
-	return false;
+    return false;
 }
 
 #endif
